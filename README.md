@@ -1,0 +1,2 @@
+# jboss-logmanager-sigma
+logmanager
