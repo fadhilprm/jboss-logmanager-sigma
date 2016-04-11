@@ -264,7 +264,7 @@ public class PeriodicSizeRotatingFileHandler extends PeriodicRotatingFileHandler
 
 	private void rotate(final File file) throws IOException {
 		final Path fileWithSuffix = Paths.get(file.getAbsolutePath() + getNextSuffix());
-		Files.deleteIfExists(Paths.get(fileWithSuffix + "." + maxBackupIndex));
+		Files.deleteIfExists(Paths.get(fileWithSuffix + "." + maxBackupIndex+".zip"));
 		for (int i = maxBackupIndex - 1; i >= 1; i--) {
 			final Path src = Paths.get(fileWithSuffix + "." + i + ".zip");
 			if (Files.exists(src)) {
@@ -272,12 +272,13 @@ public class PeriodicSizeRotatingFileHandler extends PeriodicRotatingFileHandler
 				Files.move(src, target, StandardCopyOption.REPLACE_EXISTING);
 			}
 		}
+		zipIt(new File(file.toPath().toString()), Paths.get(fileWithSuffix + ".1").toString()
+				.concat(".zip"));
 		Files.move(file.toPath(), Paths.get(fileWithSuffix + ".1"), StandardCopyOption.REPLACE_EXISTING);
-		zipIt(Paths.get(fileWithSuffix + ".1").toString(), Paths.get(fileWithSuffix + ".1").toString().concat(".zip"));
 		Files.deleteIfExists(Paths.get(fileWithSuffix + ".1"));
 	}
 
-	private void zipIt(String input, String output) {
+	private void zipIt(File input, String output) {
 
 		byte[] buffer = new byte[1024];
 
@@ -286,7 +287,7 @@ public class PeriodicSizeRotatingFileHandler extends PeriodicRotatingFileHandler
 			FileOutputStream fos = new FileOutputStream(output);
 			ZipOutputStream zos = new ZipOutputStream(fos);
 
-			ZipEntry ze = new ZipEntry(input);
+			ZipEntry ze = new ZipEntry(input.getName());
 			zos.putNextEntry(ze);
 
 			FileInputStream in =
